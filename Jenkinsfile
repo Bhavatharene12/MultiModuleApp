@@ -2,12 +2,13 @@
 //   branch v1   -> image :v1 -> deployment/service v1 -> port 30001
 //   branch v2   -> image :v2 -> deployment/service v2 -> port 30002
 //   branch main -> image :v3 -> deployment/service v3 -> port 30003
-//
-// Jenkins prerequisites: Docker, kubectl, Python and Git on the Jenkins machine, and a
-// "Username with password" credential with ID  dockerhub-creds  (DockerHub login).
 
 def run(String cmd) {
-    if (isUnix()) { sh cmd } else { bat cmd }
+    if (isUnix()) {
+        sh cmd
+    } else {
+        bat cmd
+    }
 }
 
 pipeline {
@@ -15,19 +16,28 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'bhavatharene12/multimoduleapp'
-        DOCKERHUB  = credentials('dockerhub-creds')
+        DOCKERHUB = credentials('dockerhub-creds')
+        PYTHON = 'C:\\Users\\bhava\\AppData\\Local\\Programs\\Python\\Python313\\python.exe'
     }
 
     stages {
+
         stage('Git Checkout') {
             steps {
                 checkout scm
                 script {
                     def branch = (env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'main').replaceAll('^origin/', '')
-                    if (branch == 'v1')      { env.VER = '1' }
-                    else if (branch == 'v2') { env.VER = '2' }
-                    else                     { env.VER = '3' }   // main = version 3
-                    echo "Branch: ${branch}  ->  building version v${env.VER}"
+
+                    if (branch == 'v1') {
+                        env.VER = '1'
+                    } else if (branch == 'v2') {
+                        env.VER = '2'
+                    } else {
+                        env.VER = '3'
+                    }
+
+                    echo "Branch: ${branch}"
+                    echo "Building Version: v${env.VER}"
                 }
             }
         }
@@ -35,8 +45,11 @@ pipeline {
         stage('Install Requirements') {
             steps {
                 script {
-                    if (isUnix()) { sh 'python3 -m pip install -r requirements.txt' }
-                    else          { bat 'python -m pip install -r requirements.txt' }
+                    if (isUnix()) {
+                        sh 'python3 -m pip install -r requirements.txt'
+                    } else {
+                        bat "\"${env.PYTHON}\" -m pip install -r requirements.txt"
+                    }
                 }
             }
         }
@@ -57,6 +70,7 @@ pipeline {
                     } else {
                         bat 'echo %DOCKERHUB_PSW%| docker login -u %DOCKERHUB_USR% --password-stdin'
                     }
+
                     run "docker push ${env.IMAGE_NAME}:v${env.VER}"
                 }
             }
@@ -75,7 +89,16 @@ pipeline {
     }
 
     post {
-        success { echo "Version v${env.VER} deployed -> http://localhost:3000${env.VER}" }
-        failure { echo 'Pipeline failed - check the stage logs above.' }
+        success {
+            echo "===================================="
+            echo "Deployment Successful!"
+            echo "Version : v${env.VER}"
+            echo "URL : http://localhost:3000${env.VER}"
+            echo "===================================="
+        }
+
+        failure {
+            echo "Pipeline failed. Check the console output."
+        }
     }
 }
