@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ app_title }} | {{ version_label }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="pill">{{ version_label }}</div>
+    <h1>{{ app_title }}</h1>
+    <p>Search students by Student ID or Name</p>
+  </div>
+  {% block content %}{% endblock %}
+  <div class="foot">24MIS0505 · Multi-module App · Version 2</div>
+</div>
+</body>
+</html>

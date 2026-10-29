@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<form class="searchbox" method="get" action="{{ url_for('search') }}">
+  <select name="by">
+    <option value="id" {{ 'selected' if by == 'id' }}>Student ID</option>
+    <option value="name" {{ 'selected' if by == 'name' }}>Student Name</option>
+  </select>
+  <input name="q" value="{{ q }}" placeholder="Type ID or name and press Search" required autofocus>
+  <button type="submit">Search</button>
+</form>
+
+{% if searched %}
+<div class="panel">
+  <h2>{{ results|length }} result(s) for “{{ q }}”</h2>
+  {% if results %}
+  <table>
+    <thead><tr><th>Student ID</th><th>Name</th><th>Department</th><th>Email</th></tr></thead>
+    <tbody>
+    {% for s in results %}
+      <tr><td>{{ s.id }}</td><td>{{ s.name }}</td><td>{{ s.department }}</td><td>{{ s.email }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="none">No student found.</p>
+  {% endif %}
+</div>
+{% else %}
+<div class="panel hint">{{ total }} student records available to search. Try ID <b>24MIS0505</b> or name <b>Priya</b>.</div>
+{% endif %}
+{% endblock %}

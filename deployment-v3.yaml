@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: multimoduleapp-v3
+  labels:
+    app: multimoduleapp-v3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: multimoduleapp-v3
+  template:
+    metadata:
+      labels:
+        app: multimoduleapp-v3
+    spec:
+      containers:
+        - name: multimoduleapp
+          image: bhavatharene12/multimoduleapp:v3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000

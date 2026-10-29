@@ -1,0 +1,8 @@
+.git
+.gitignore
+Jenkinsfile
+*.yaml
+*.md
+*.sh
+__pycache__/
+*.pyc
