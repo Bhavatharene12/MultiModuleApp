@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="title">Connected Dashboard</h2>
+<div class="stats">
+  <div class="stat"><div class="num">{{ total }}</div><div class="lbl">Total Students</div></div>
+  <div class="stat"><div class="num">{{ latest_id }}</div><div class="lbl">Latest Student ID</div></div>
+  <div class="stat"><div class="num">{{ modules|length }}</div><div class="lbl">Connected Modules</div></div>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <h3>Connected Modules</h3>
+    {% for m in modules %}
+    <a class="mod" href="{{ url_for(m.link) }}"><span class="dot"></span>{{ m.name }}<em>Connected</em></a>
+    {% endfor %}
+  </div>
+  <div class="card">
+    <h3>Quick Search</h3>
+    <form class="quick" method="get" action="{{ url_for('search') }}">
+      <select name="by"><option value="id">Student ID</option><option value="name">Name</option></select>
+      <input name="q" placeholder="Search students..." required>
+      <button class="btn" type="submit">Quick Search</button>
+    </form>
+    <h3 style="margin-top:22px">Navigate</h3>
+    <div class="actions">
+      <a class="btn" href="{{ url_for('students_list') }}">Go to Module 1</a>
+      <a class="btn" href="{{ url_for('search') }}">Go to Module 2</a>
+      <a class="btn alt" href="{{ url_for('add_student') }}">Add Student</a>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Recent Students</h3>
+  {% if recent %}
+  <table>
+    <thead><tr><th>Student ID</th><th>Name</th><th>Department</th><th>Email</th></tr></thead>
+    <tbody>
+    {% for s in recent %}
+      <tr><td>{{ s.id }}</td><td>{{ s.name }}</td><td>{{ s.department }}</td><td>{{ s.email }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="empty">No students yet.</p>{% endif %}
+</div>
+{% endblock %}

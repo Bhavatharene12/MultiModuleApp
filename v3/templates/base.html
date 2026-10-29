@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ app_title }} | {{ version_label }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<aside>
+  <div class="logo">{{ app_title }}</div>
+  <div class="ver">{{ version_label }}</div>
+  <a href="{{ url_for('dashboard') }}" class="{{ 'on' if request.endpoint == 'dashboard' }}">▣ Dashboard</a>
+  <div class="grp">Module 1</div>
+  <a href="{{ url_for('add_student') }}" class="{{ 'on' if request.endpoint == 'add_student' }}">＋ Add Student</a>
+  <a href="{{ url_for('students_list') }}" class="{{ 'on' if request.endpoint == 'students_list' }}">☰ Student List</a>
+  <div class="grp">Module 2</div>
+  <a href="{{ url_for('search') }}" class="{{ 'on' if request.endpoint == 'search' }}">⌕ Search</a>
+  <div class="side-foot">24MIS0505 · Version 3<br>All modules connected</div>
+</aside>
+<section class="content">
+  <div class="flow">Dashboard <i>→</i> Module 1 <i>→</i> Module 2 <i>→</i> <b>Connected</b></div>
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in msgs %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</section>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="title">Module 1 – Add Student</h2>
+<div class="card">
+  <form method="post" action="{{ url_for('add_student') }}">
+    <div class="row">
+      <div><label for="sid">Student ID</label><input id="sid" name="student_id" placeholder="e.g. 24MIS0510" required></div>
+      <div><label for="name">Student Name</label><input id="name" name="name" placeholder="Full name" required></div>
+    </div>
+    <div class="row">
+      <div><label for="dept">Department</label><input id="dept" name="department" placeholder="e.g. MIS" required></div>
+      <div><label for="email">Email</label><input id="email" name="email" type="email" placeholder="name@vitstudent.ac.in" required></div>
+    </div>
+    <button class="btn" type="submit">Add Student</button>
+  </form>
+</div>
+{% endblock %}

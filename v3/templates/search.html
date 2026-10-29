@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="title">Module 2 – Search Students</h2>
+<div class="card">
+  <form class="quick" method="get" action="{{ url_for('search') }}">
+    <select name="by">
+      <option value="id" {{ 'selected' if by == 'id' }}>Student ID</option>
+      <option value="name" {{ 'selected' if by == 'name' }}>Student Name</option>
+    </select>
+    <input name="q" value="{{ q }}" placeholder="Enter ID or name" required>
+    <button class="btn" type="submit">Search</button>
+  </form>
+</div>
+{% if searched %}
+<div class="card">
+  <h3>Results ({{ results|length }})</h3>
+  {% if results %}
+  <table>
+    <thead><tr><th>Student ID</th><th>Name</th><th>Department</th><th>Email</th></tr></thead>
+    <tbody>
+    {% for s in results %}
+      <tr><td>{{ s.id }}</td><td>{{ s.name }}</td><td>{{ s.department }}</td><td>{{ s.email }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="empty">No student found for “{{ q }}”.</p>{% endif %}
+</div>
+{% endif %}
+<a class="btn alt" href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+{% endblock %}
