@@ -1,8 +1,3 @@
-// One Jenkinsfile for all versions. The Git branch decides which version is built:
-//   branch v1   -> image :v1 -> deployment/service v1 -> port 30001
-//   branch v2   -> image :v2 -> deployment/service v2 -> port 30002
-//   branch main -> image :v3 -> deployment/service v3 -> port 30003
-
 def run(String cmd) {
     if (isUnix()) {
         sh cmd
@@ -17,7 +12,10 @@ pipeline {
     environment {
         IMAGE_NAME = 'bhavatharene12/multimoduleapp'
         DOCKERHUB = credentials('dockerhub-creds')
+
         PYTHON = 'C:\\Users\\bhava\\AppData\\Local\\Programs\\Python\\Python313\\python.exe'
+        DOCKER = 'C:\\Users\\bhava\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe'
+        KUBECTL = 'C:\\Users\\bhava\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\kubectl.exe'
     }
 
     stages {
@@ -25,6 +23,7 @@ pipeline {
         stage('Git Checkout') {
             steps {
                 checkout scm
+
                 script {
                     def branch = (env.BRANCH_NAME ?: env.GIT_BRANCH ?: 'main').replaceAll('^origin/', '')
 
@@ -36,8 +35,8 @@ pipeline {
                         env.VER = '3'
                     }
 
-                    echo "Branch: ${branch}"
-                    echo "Building Version: v${env.VER}"
+                    echo "Branch : ${branch}"
+                    echo "Building Version : v${env.VER}"
                 }
             }
         }
@@ -57,7 +56,19 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    run "docker build --build-arg VERSION=${env.VER} -t ${env.IMAGE_NAME}:v${env.VER} ."
+                    run "\"${env.DOCKER}\" build --build-arg VERSION=${env.VER} -t ${env.IMAGE_NAME}:v${env.VER} ."
+                }
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh 'echo $DOCKERHUB_PSW | docker login -u $DOCKERHUB_USR --password-stdin'
+                    } else {
+                        bat 'echo %DOCKERHUB_PSW% | "C:\\Users\\bhava\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" login -u %DOCKERHUB_USR% --password-stdin'
+                    }
                 }
             }
         }
@@ -65,24 +76,27 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    if (isUnix()) {
-                        sh 'echo $DOCKERHUB_PSW | docker login -u $DOCKERHUB_USR --password-stdin'
-                    } else {
-                        bat 'echo %DOCKERHUB_PSW%| docker login -u %DOCKERHUB_USR% --password-stdin'
-                    }
-
-                    run "docker push ${env.IMAGE_NAME}:v${env.VER}"
+                    run "\"${env.DOCKER}\" push ${env.IMAGE_NAME}:v${env.VER}"
                 }
             }
         }
 
-        stage('Deploy Kubernetes') {
+        stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    run "kubectl apply -f deployment-v${env.VER}.yaml"
-                    run "kubectl apply -f service-v${env.VER}.yaml"
-                    run "kubectl rollout restart deployment/multimoduleapp-v${env.VER}"
-                    run "kubectl get deployment"
+                    run "\"${env.KUBECTL}\" apply -f deployment-v${env.VER}.yaml"
+                    run "\"${env.KUBECTL}\" apply -f service-v${env.VER}.yaml"
+                    run "\"${env.KUBECTL}\" rollout restart deployment/multimoduleapp-v${env.VER}"
+                }
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                script {
+                    run "\"${env.KUBECTL}\" get deployments"
+                    run "\"${env.KUBECTL}\" get services"
+                    run "\"${env.KUBECTL}\" get pods"
                 }
             }
         }
@@ -90,15 +104,16 @@ pipeline {
 
     post {
         success {
-            echo "===================================="
-            echo "Deployment Successful!"
+            echo "========================================"
+            echo "Pipeline completed successfully!"
             echo "Version : v${env.VER}"
-            echo "URL : http://localhost:3000${env.VER}"
-            echo "===================================="
+            echo "Image   : ${env.IMAGE_NAME}:v${env.VER}"
+            echo "URL     : http://localhost:3000${env.VER}"
+            echo "========================================"
         }
 
         failure {
-            echo "Pipeline failed. Check the console output."
+            echo "Pipeline failed. Check the Console Output."
         }
     }
 }
